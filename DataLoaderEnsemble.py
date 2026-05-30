@@ -1,7 +1,6 @@
 import os
 import glob
 from collections import Counter
-
 import cv2
 import numpy as np
 import torch
@@ -10,6 +9,7 @@ from torch.utils.data import DataLoader, WeightedRandomSampler
 from monai.transforms import (
     Compose, LoadImaged, EnsureChannelFirstd, Resized,
     RepeatChanneld, RandRotated, RandFlipd, RandZoomd,
+    RandAdjustContrastd, RandShiftIntensityd,
     NormalizeIntensityd, ToTensord, MapTransform,
 )
 
@@ -37,6 +37,7 @@ class CLAHEd(MapTransform):
             d[key]    = np.expand_dims(img_clahe, axis=0)
         return d
 
+
 def _build_train_transforms():
     return Compose([
         LoadImaged(keys=["image"], image_only=True),
@@ -47,10 +48,8 @@ def _build_train_transforms():
 
         RandRotated(keys=["image"], range_x=0.26, prob=0.6,
                     keep_size=True, mode="bilinear"),
-
         RandFlipd(keys=["image"], spatial_axis=1, prob=0.5),
         RandFlipd(keys=["image"], spatial_axis=0, prob=0.5),
-
         RandZoomd(keys=["image"], min_zoom=0.85, max_zoom=1.15,
                   prob=0.5, keep_size=True),
         NormalizeIntensityd(keys=["image"], channel_wise=True),
@@ -71,11 +70,17 @@ def _build_val_test_transforms():
 def _load_split(data_dir, split):
     split_dir   = os.path.join(data_dir, split)
     image_paths = glob.glob(os.path.join(split_dir, "*", "*.*"))
-    return [
-        {"image": p, "label": CLASS_TO_IDX[os.path.basename(os.path.dirname(p))]}
-        for p in image_paths
-        if os.path.basename(os.path.dirname(p)) in CLASS_TO_IDX
-    ]
+    
+    data_list = []
+    for p in image_paths:
+        original_class = os.path.basename(os.path.dirname(p))
+        if original_class in CLASS_TO_IDX:
+            if original_class == "Biliary_Leaks":
+                binary_label = 1 # Positivo
+            else:
+                binary_label = 0 # Negativo (Outros) 
+            data_list.append({"image": p, "label": binary_label})
+    return data_list
 
 def _build_sampler(labels):
     counts  = Counter(labels)
@@ -99,8 +104,7 @@ def _compute_class_weights(labels):
          for i in range(len(CLASS_NAMES))],
         dtype=torch.float32,
     )
-
-    print(f"\nClass weights: {weights.tolist()}")
+    print(f"\n Class weights: {weights.tolist()}")
     return weights
 
 def get_dataloaders(data_dir, batch_size=8, num_workers=0):

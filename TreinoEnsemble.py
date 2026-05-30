@@ -15,7 +15,7 @@ from sklearn.metrics import f1_score, classification_report, confusion_matrix
 from tqdm import tqdm
 import wandb
 
-from Dataloader import get_dataloaders, CLASS_NAMES
+from DataLoaderEnsemble import get_dataloaders, CLASS_NAMES
 
 
 CONFIG = {
@@ -23,8 +23,8 @@ CONFIG = {
     "batch_size"         : 8,
     "num_workers"        : 0,
 
-    "model_name"         : "convnext-small-final",
-    "num_classes"        : 4,
+    "model_name"         : "convnext-small-Billiary",
+    "num_classes"        : 2,
     "dropout"            : 0.3,
     "use_amp"            : True,
 
@@ -39,9 +39,9 @@ CONFIG = {
     "T_max"              : 45,
 
     "checkpoint_dir"     : "checkpoints",
-    "best_model_name"    : "best_convnext_v4.pth",
+    "best_model_name"    : "billiary_leaks_spec.pth",
     "wandb_project"      : "cpre-miqr-classification",
-    "wandb_run_name"     : "convnext-small-v4",
+    "wandb_run_name"     : "convnext-small-Billiary",
 }
 
 
@@ -56,7 +56,7 @@ def set_seed(seed=42):
 # ── MODELO ────────────────────────────────────────────────────
 def build_model(num_classes=4, dropout=0.3):
     model = models.convnext_small(weights=models.ConvNeXt_Small_Weights.IMAGENET1K_V1)
-    in_features = model.classifier[2].in_features
+    in_features = model.classifier[2].in_features   # 768
     model.classifier[2] = nn.Sequential(
         nn.Dropout(p=dropout, inplace=True),
         nn.Linear(in_features, num_classes),
@@ -143,7 +143,7 @@ def eval_epoch(model, loader, criterion, device):
         all_labels.extend(labels.cpu().numpy())
 
     return (total_loss / len(loader),
-            f1_score(all_labels, all_preds, average="macro", zero_division=0))
+            f1_score(all_labels, all_preds, average="binary", pos_label=1, zero_division=0))
 
 
 # ── AVALIAÇÃO FINAL ───────────────────────────────────────────
@@ -164,10 +164,10 @@ def evaluate_test(model, test_loader, device, class_names, checkpoint_path, labe
             all_preds.extend(logits.argmax(dim=1).cpu().numpy())
             all_labels.extend(labels.numpy())
 
-    test_f1 = f1_score(all_labels, all_preds, average="macro", zero_division=0)
+    test_f1 = f1_score(all_labels, all_preds, average="binary", pos_label=1, zero_division=0)
 
     print("\n" + "═"*60)
-    print(f"  F1-Score Macro (Teste {label}): {test_f1:.4f}")
+    print(f"  F1-Score Binary (Teste {label}): {test_f1:.4f}")
     print("═"*60)
     print(classification_report(all_labels, all_preds,
                                  target_names=class_names, zero_division=0))
@@ -176,7 +176,7 @@ def evaluate_test(model, test_loader, device, class_names, checkpoint_path, labe
     print("═"*60 + "\n")
 
     wandb.log({
-        f"test{label}/f1_macro"      : test_f1,
+        f"test{label}/f1_binary"      : test_f1,
         f"test{label}/confusion_matrix": wandb.plot.confusion_matrix(
             probs=None, y_true=all_labels,
             preds=all_preds, class_names=class_names,
@@ -259,8 +259,8 @@ def main():
               f"{val_loss:>8.4f} | {val_f1:>6.4f} | {current_lr:>9.2e}")
 
         wandb.log({"epoch": epoch+1, "train/loss": train_loss,
-                   "train/f1_macro": train_f1, "val/loss": val_loss,
-                   "val/f1_macro": val_f1, "val/best_f1": best_val_f1,
+                   "train/f1_binary": train_f1, "val/loss": val_loss,
+                   "val/f1_binary": val_f1, "val/best_f1": best_val_f1,
                    "train/lr": current_lr,
                    "early_stop/patience": patience_ctr})
 
