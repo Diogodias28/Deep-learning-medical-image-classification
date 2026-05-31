@@ -1,113 +1,164 @@
 # AP-TP2
 
-Resumo
--
-Projeto do Módulo 2 (AP) — Trabalho de Grupo: implementação de modelos e ensemble para classificação. Este repositório contém código, dados (quando possíveis), scripts de treino e avaliação, e exemplos para reproduzir os resultados obtidos.
+## Visão Geral
 
-Conteúdo do repositório
--
-- `Treino.py` — script principal de treino (ver parâmetros no cabeçalho).
-- `TreinoBinarySpecialist.py` — variante de treino para especialistas binários.
-- `TreinoEnsemble.py`, `Ensemble3.py`, `ensembleCascade.py`, `ensembleTest.py` — implementações e testes de ensemble.
-- `Dataloader.py`, `Dataloader_inicial.py`, `DataLoaderEnsemble.py`, `ComparacaoDataloader.py` — carregamento e preparação de dados.
-- `evaluate.py` — script para avaliar modelos a partir de checkpoints.
-- `Confusion_matrix_v6.py`, `confusion_matrix_v6.py` — utilitários para gerar matrizes de confusão e métricas.
-- `Attention_maps.py` — geração de mapas de atenção (se aplicável).
-- `demo.ipynb` — notebook com exemplos de uso e visualizações.
-- `checkpoints/` — pasta com checkpoints (não commitar grandes modelos; incluir apenas o necessário para reprodução).
+Este repositório contém o trabalho de grupo da unidade curricular de AP, centrado em classificação de imagens médicas com redes neurais profundas, comparação de arquiteturas e combinação de modelos em ensemble.
 
-Requisitos e ambiente
--
-Recomendado: Python 3.8+ e ambiente virtual. Instalar dependências com:
+O objetivo do projeto foi estudar o impacto de diferentes modelos e estratégias de treino na identificação de quatro classes:
 
-Windows / PowerShell
+- `Biliary_Leaks`
+- `Lithiasis`
+- `Normal`
+- `Stricture`
 
+O código do projeto também está disponível no GitHub em:
+
+https://github.com/RuiRodrigues17/AP-TP2.git
+
+## Estrutura do Repositório
+
+### Fluxo principal
+
+- `Treino.py` — treino principal do modelo base.
+- `Dataloader.py` — carregamento e preparação dos dados do fluxo principal.
+- `evaluate.py` — avaliação de checkpoints já treinados.
+- `Attention_maps.py` — geração de mapas de atenção para inspeção visual.
+- `demo.ipynb` — demonstração interativa com exemplos de execução e visualização.
+- `checkpoints/` — modelos treinados e checkpoints guardados durante os experimentos.
+
+### Variações, especialistas e testes
+
+- `TreinoBinarySpecialist.py` — treino de um especialista binário.
+- `Dataloader_inicial.py` — versão inicial do carregamento de dados usada em fases anteriores.
+- `DataLoaderEnsemble.py` — dataloader adaptado para cenários de ensemble.
+- `TreinoEnsemble.py` — treino de variantes usadas em ensemble.
+- `Ensemble3.py` — combinação de três modelos.
+- `ensembleCascade.py` — abordagem com um especialista.
+- `ensembleTest.py` — teste final do ensemble sem treino.
+- `ComparacaoDataloader.py` — comparação entre carregamentos/preparações de dados.
+- `Confusion_matrix_v6.py` — geração e análise de matrizes de confusão.
+
+## Dados
+
+Os dados não estão na pasta de entrega ZIP. Eles estão disponíveis no repositório do GitHub do link acima.
+
+O layout esperado é o seguinte:
+
+```text
+dataset/
+  train/
+    Biliary_Leaks/
+    Lithiasis/
+    Normal/
+    Stricture/
+  val/
+    Biliary_Leaks/
+    Lithiasis/
+    Normal/
+    Stricture/
+  test/
+    Biliary_Leaks/
+    Lithiasis/
+    Normal/
+    Stricture/
 ```
+
+Os scripts de treino e avaliação assumem esta organização ao chamar `get_dataloaders(...)`.
+
+## Requisitos
+
+Recomendado:
+
+- Python 3.8 ou superior
+- Ambiente virtual dedicado
+- CUDA/GPU
+
+Instalação típica em Windows:
+
+```bash
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+\.venv\Scripts\Activate.ps1
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install -r Requirements.txt
 ```
 
-Linux / macOS
+## Como Executar
 
-```
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-```
+### 1. Treino do modelo principal
 
-Arquivo de dependências
--
-Veja `requirements.txt` para a lista completa de pacotes e versões usadas.
-
-Executar os experimentos (exemplos)
--
-1) Treino de um modelo (exemplo genérico)
-
-```
-python Treino.py --epochs 50 --batch-size 32 --data-path PATH_PARA_DADOS --output checkpoints/saida.pth
+```bash
+python Treino.py
 ```
 
-2) Treino de ensemble (exemplo)
+### 2. Treino do especialista
 
-```
-python TreinoEnsemble.py --models model1,model2 --data-path PATH_PARA_DADOS --output checkpoints/ensemble.pth
-```
-
-3) Avaliação a partir de checkpoint
-
-```
-python evaluate.py --checkpoint checkpoints/saida.pth --data-path PATH_PARA_DADOS --out-dir results/
+```bash
+python TreinoBinarySpecialist.py
 ```
 
-4) Executar o notebook de demonstração
+### 3. Avaliação de um checkpoint
 
-Abra `demo.ipynb` no Jupyter / VSCode e execute as células na ordem.
-
-Parâmetros e seeds
--
-Para reprodução exacta, fixe as seeds (quando suportado pelos scripts) e especifique `--seed 42` (ou outra seed usada nos relatórios). Se os scripts não expõem seed via CLI, edite o início do script para definir a seed global (NumPy, random e framework ML usado).
-
-Dados
--
-Se os dados não estiverem incluídos neste repositório, siga as instruções no relatório (ou no cabeçalho dos scripts) para obter e preparar os datasets. Os argumentos `--data-path` usados nos exemplos devem apontar para a pasta com as imagens/CSV organizados conforme esperado pelo `Dataloader.py`.
-
-Uso em Google Colab / estrutura alternativa
--
-Muitos dos treinos e experimentos foram executados em Google Colab, pelo que existe uma estrutura alternativa de ficheiros/paths usada nos notebooks. Notas importantes para reproduzir em Colab:
-
-- Ativar GPU: Runtime → Change runtime type → Hardware accelerator → GPU.
-- Montar o Google Drive para ler/gravar dados e checkpoints:
-
-```
-from google.colab import drive
-drive.mount('/content/drive')
+```bash
+python evaluate.py --checkpoint checkpoints/best_model_v6.pth --data-path dataset
 ```
 
-- Clonar o repositório no Colab ou enviar o zip para o Drive e descompactar:
+### 4. Teste do ensemble
 
-```
-!git clone <URL_DO_REPO>
-%cd AP-TP2
-pip install -r requirements.txt
+```bash
+python ensembleTest.py
 ```
 
-- Paths típicos usados no Colab:
-	- Dados: `/content/drive/MyDrive/path_para_dados/`
-	- Checkpoints: `/content/drive/MyDrive/AP-TP2/checkpoints/`
-	- Resultados/figuras: `/content/drive/MyDrive/AP-TP2/results/`
+### 5. Geração de mapas de atenção
 
-- Para garantir que os scripts escrevem direta­mente no Drive (evita perda de dados ao terminar a sessão), passe `--output /content/drive/MyDrive/AP-TP2/checkpoints/saida.pth` ou configure `--out-dir` para uma pasta no Drive.
+```bash
+python Attention_maps.py
+```
 
-- O `demo.ipynb` pode ter células que assumem paths do Drive; verifique e ajuste os caminhos locais antes de executar.
+### 6. Notebook de demonstração
 
-- Aviso: alguns checkpoints e ficheiros de resultados referenciados no relatório podem não estar incluídos no repositório porque ficaram apenas no Drive do autor. Nesse caso, os ficheiros essenciais para reprodução devem ser adicionados ao zip de submissão (ver secção "Como gerar o ficheiro ZIP para submissão").
+Abrir `demo.ipynb` no Jupyter ou no VS Code e executar as células por ordem.
 
-Ficheiros de saída e onde encontrar resultados
--
-- Checkpoints: `checkpoints/`
-- Matrizes de confusão e figuras: `results/` (ou pasta indicada com `--out-dir`)
-- Logs de treino: caso os scripts escrevam logs, estarão na pasta `logs/` ou conforme o parâmetro de saída.
+## Checkpoints
 
+A pasta `checkpoints/` guarda os pesos dos modelos treinados. Entre os ficheiros mais relevantes estão:
+
+- `best_model_v6.pth` (o nosso melhor modelo)
+- `convnext-base-flips.pth`
+- `best_convnext_v4.pth`
+- outros checkpoints usados em testes e comparações
+
+Estes ficheiros são essenciais para reproduzir os resultados sem voltar a treinar do zero.
+
+## Scripts de Comparação e Ensemble
+
+Os scripts abaixo foram usados para comparar abordagens ou testar combinações de modelos:
+
+- `ensembleTest.py` — mistura de probabilidades entre dois modelos já treinados.
+- `TreinoEnsemble.py` — treino de estratégias específicas de ensemble.
+- `Ensemble3.py` — comparação de três modelos.
+- `ensembleCascade.py` — ensemble com um modelo especialista.
+- `ComparacaoDataloader.py` — análise de impacto das alterações no dataloader.
+- `Confusion_matrix_v6.py` — geração de matriz de confusão para o modelo v6.
+
+## Resultados e Saídas
+
+Dependendo do script executado, os resultados podem ser guardados em:
+
+- `checkpoints/` — pesos dos modelos e melhores épocas
+- `results/` — figuras, métricas e saídas auxiliares, quando aplicável
+- `wandb/` — logs e métricas experimentais, se o Weights & Biases estiver ativo
+
+## Observações de Uso
+
+- O projeto foi desenvolvido com várias iterações de treino e teste, por isso existem scripts com funções semelhantes mas objetivos diferentes.
+- Alguns ficheiros foram mantidos para comparação histórica entre arquiteturas e dataloaders.
+- Para executar em GPU, basta garantir que o PyTorch está instalado com suporte CUDA e que o dispositivo é detetado corretamente.
+
+## Resumo Rápido
+
+Se quiser apenas reproduzir a parte principal do projeto, a ordem mais direta é:
+
+1. Preparar os dados na estrutura esperada.
+2. Treinar com `Treino.py` ou usar checkpoints já existentes.
+3. Avaliar com `evaluate.py`.
+4. Consultar `demo.ipynb` e `Attention_maps.py` para visualização.
