@@ -1,48 +1,50 @@
 # AP-TP2
 
-## Visão Geral
+[![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![torchvision](https://img.shields.io/badge/torchvision-Models%20%26%20Transforms-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/vision/stable/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-Metrics-F7931E?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![OpenCV](https://img.shields.io/badge/OpenCV-Image%20Processing-5C3EE8?logo=opencv&logoColor=white)](https://opencv.org/)
+[![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37626?logo=jupyter&logoColor=white)](https://jupyter.org/)
+[![Weights & Biases](https://img.shields.io/badge/Weights%20%26%20Biases-Experiment%20Tracking-FFBE00?logo=weightsandbiases&logoColor=black)](https://wandb.ai/)
 
-Este repositório contém o trabalho de grupo da unidade curricular de AP, centrado em classificação de imagens médicas com redes neurais profundas, comparação de arquiteturas e combinação de modelos em ensemble.
+## Overview
 
-O objetivo do projeto foi estudar o impacto de diferentes modelos e estratégias de treino na identificação de quatro classes:
+This repository contains the group project for the AP course unit, focused on medical image classification with deep neural networks, architecture comparison, and ensemble model combination.
+
+The project studies the impact of different models and training strategies on the identification of four classes:
 
 - `Biliary_Leaks`
 - `Lithiasis`
 - `Normal`
 - `Stricture`
 
-O código do projeto também está disponível no GitHub em:
+## Repository Structure
 
-https://github.com/RuiRodrigues17/AP-TP2.git
+### Main pipeline
 
-## Estrutura do Repositório
+- `Treino.py` — main training script for the base model.
+- `Dataloader.py` — data loading and preprocessing for the main pipeline.
+- `evaluate.py` — evaluation of previously trained checkpoints.
+- `Attention_maps.py` — generation of attention maps for visual inspection.
+- `demo.ipynb` — interactive demonstration with execution examples and visualisations.
+- `checkpoints/` — trained models and checkpoints saved during the experiments.
 
-### Fluxo principal
+### Variants, specialists, and tests
 
-- `Treino.py` — treino principal do modelo base.
-- `Dataloader.py` — carregamento e preparação dos dados do fluxo principal.
-- `evaluate.py` — avaliação de checkpoints já treinados.
-- `Attention_maps.py` — geração de mapas de atenção para inspeção visual.
-- `demo.ipynb` — demonstração interativa com exemplos de execução e visualização.
-- `checkpoints/` — modelos treinados e checkpoints guardados durante os experimentos.
+- `TreinoBinarySpecialist.py` — training of a binary specialist model.
+- `Dataloader_inicial.py` — initial data-loading version used in earlier stages.
+- `DataLoaderEnsemble.py` — dataloader adapted for ensemble scenarios.
+- `TreinoEnsemble.py` — training of ensemble variants.
+- `Ensemble3.py` — combination of three models.
+- `ensembleCascade.py` — approach using a specialist model.
+- `ensembleTest.py` — final ensemble test without training.
+- `ComparacaoDataloader.py` — comparison of data-loading and preprocessing pipelines.
+- `Confusion_matrix_v6.py` — generation and analysis of confusion matrices.
 
-### Variações, especialistas e testes
+## Data
 
-- `TreinoBinarySpecialist.py` — treino de um especialista binário.
-- `Dataloader_inicial.py` — versão inicial do carregamento de dados usada em fases anteriores.
-- `DataLoaderEnsemble.py` — dataloader adaptado para cenários de ensemble.
-- `TreinoEnsemble.py` — treino de variantes usadas em ensemble.
-- `Ensemble3.py` — combinação de três modelos.
-- `ensembleCascade.py` — abordagem com um especialista.
-- `ensembleTest.py` — teste final do ensemble sem treino.
-- `ComparacaoDataloader.py` — comparação entre carregamentos/preparações de dados.
-- `Confusion_matrix_v6.py` — geração e análise de matrizes de confusão.
-
-## Dados
-
-Os dados não estão na pasta de entrega ZIP. Eles estão disponíveis no repositório do GitHub do link acima.
-
-O layout esperado é o seguinte:
+The expected directory layout is:
 
 ```text
 dataset/
@@ -63,17 +65,17 @@ dataset/
     Stricture/
 ```
 
-Os scripts de treino e avaliação assumem esta organização ao chamar `get_dataloaders(...)`.
+The training and evaluation scripts assume this organisation when calling `get_dataloaders(...)`.
 
-## Requisitos
+## Requirements
 
-Recomendado:
+Recommended:
 
-- Python 3.8 ou superior
-- Ambiente virtual dedicado
-- CUDA/GPU
+- Python 3.8 or newer
+- A dedicated virtual environment
+- CUDA-compatible GPU
 
-Instalação típica em Windows:
+Typical installation on Windows:
 
 ```bash
 python -m venv .venv
@@ -82,83 +84,87 @@ pip install --upgrade pip
 pip install -r Requirements.txt
 ```
 
-## Como Executar
+## Usage
 
-### 1. Treino do modelo principal
+### 1. Train the main model
 
 ```bash
 python Treino.py
 ```
 
-### 2. Treino do especialista
+### 2. Train the specialist model
 
 ```bash
 python TreinoBinarySpecialist.py
 ```
 
-### 3. Avaliação de um checkpoint
+### 3. Evaluate a checkpoint
 
 ```bash
 python evaluate.py --checkpoint checkpoints/best_model_v6.pth --data-path dataset
 ```
 
-### 4. Teste do ensemble
+### 4. Test the ensemble
 
 ```bash
 python ensembleTest.py
 ```
 
-### 5. Geração de mapas de atenção
+### 5. Generate attention maps
 
 ```bash
 python Attention_maps.py
 ```
 
-### 6. Notebook de demonstração
+### 6. Run the demonstration notebook
 
-Abrir `demo.ipynb` no Jupyter ou no VS Code e executar as células por ordem.
+Open `demo.ipynb` in Jupyter or VS Code and execute the cells in order.
 
 ## Checkpoints
 
-A pasta `checkpoints/` guarda os pesos dos modelos treinados. Entre os ficheiros mais relevantes estão:
+The `checkpoints/` directory contains the weights of the trained models. The most relevant files include:
 
-- `best_model_v6.pth` (o nosso melhor modelo)
+- `best_model_v6.pth` — the best-performing model.
 - `convnext-base-flips.pth`
 - `best_convnext_v4.pth`
-- outros checkpoints usados em testes e comparações
+- Other checkpoints used in tests and comparisons.
 
-Estes ficheiros são essenciais para reproduzir os resultados sem voltar a treinar do zero.
+These files are required to reproduce the results without training the models from scratch.
 
-## Scripts de Comparação e Ensemble
+## Comparison and Ensemble Scripts
 
-Os scripts abaixo foram usados para comparar abordagens ou testar combinações de modelos:
+The following scripts were used to compare approaches or test model combinations:
 
-- `ensembleTest.py` — mistura de probabilidades entre dois modelos já treinados.
-- `TreinoEnsemble.py` — treino de estratégias específicas de ensemble.
-- `Ensemble3.py` — comparação de três modelos.
-- `ensembleCascade.py` — ensemble com um modelo especialista.
-- `ComparacaoDataloader.py` — análise de impacto das alterações no dataloader.
-- `Confusion_matrix_v6.py` — geração de matriz de confusão para o modelo v6.
+- `ensembleTest.py` — probability blending between two previously trained models.
+- `TreinoEnsemble.py` — training of specific ensemble strategies.
+- `Ensemble3.py` — comparison of three models.
+- `ensembleCascade.py` — ensemble using a specialist model.
+- `ComparacaoDataloader.py` — analysis of the impact of dataloader changes.
+- `Confusion_matrix_v6.py` — generation of the confusion matrix for model v6.
 
-## Resultados e Saídas
+## Results and Outputs
 
-Dependendo do script executado, os resultados podem ser guardados em:
+Depending on the script being executed, results may be saved to:
 
-- `checkpoints/` — pesos dos modelos e melhores épocas
-- `results/` — figuras, métricas e saídas auxiliares, quando aplicável
-- `wandb/` — logs e métricas experimentais, se o Weights & Biases estiver ativo
+- `checkpoints/` — model weights and best epochs.
+- `results/` — figures, metrics, and auxiliary outputs, when applicable.
+- `wandb/` — experiment logs and metrics, when Weights & Biases is enabled.
 
-## Observações de Uso
+## Usage Notes
 
-- O projeto foi desenvolvido com várias iterações de treino e teste, por isso existem scripts com funções semelhantes mas objetivos diferentes.
-- Alguns ficheiros foram mantidos para comparação histórica entre arquiteturas e dataloaders.
-- Para executar em GPU, basta garantir que o PyTorch está instalado com suporte CUDA e que o dispositivo é detetado corretamente.
+- The project was developed through several training and testing iterations; therefore, some scripts have similar functions but different purposes.
+- Some files were retained to support historical comparisons between architectures and dataloaders.
+- To run on a GPU, ensure that PyTorch is installed with CUDA support and that the device is detected correctly.
 
-## Resumo Rápido
+## Quick Start
 
-Se quiser apenas reproduzir a parte principal do projeto, a ordem mais direta é:
+To reproduce the main workflow:
 
-1. Preparar os dados na estrutura esperada.
-2. Treinar com `Treino.py` ou usar checkpoints já existentes.
-3. Avaliar com `evaluate.py`.
-4. Consultar `demo.ipynb` e `Attention_maps.py` para visualização.
+1. Prepare the data using the expected directory structure.
+2. Train with `Treino.py` or use one of the existing checkpoints.
+3. Evaluate with `evaluate.py`.
+4. Use `demo.ipynb` and `Attention_maps.py` for visualisation.
+
+## Authorship Note
+
+This project was developed collaboratively for the **Deep Learning** course unit of the **Master's Degree in Artificial Intelligence at the University of Minho (UMinho)**.
